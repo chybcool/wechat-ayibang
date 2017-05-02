@@ -1,0 +1,5 @@
+<view class="container">
+    <image src="{{images}}"></image>
+    <text class="nologin" bindtap="bindViewTap">{{nologin}}</text>
+    <text class="login" bindtap="bindViewTap">{{login}}</text>
+</view>

@@ -1,1 +1,130 @@
 # wechat-ayibang
+微信小程序是什么？<br>
+官方解释，微信小程序，简称小程序，是一种不需要下载安装即可使用的应用，它实现了应用“触手可及”的梦想，用户扫一扫或搜一下即可打开应用。简而言之，就是用户需要的时候打开，用完即走的一种应用。如果小程序能够兴起，我想到时候我们的手机将会变得很简单干净，因为你无需下载安装各种App。<br>
+开发微信小程序你需要准备好这些工具：<br>
+    下载微信开发者工具，附上地址：https://mp.weixin.qq.com/debug/wxadoc/dev/devtools/download.html 下载好后就可以进行开发了，不过呢，如果要发布你的小程序呢，你要去申请AppId走各种流程，不过平时练练手可以选择无Appid进行开发，不过会有一些局限。具体开发详情你可以去https://mp.weixin.qq.com 这里了解。<br>
+在开始coding时，要配置好一些基础文件，在app.json里注册页面(page)，每一个需要用到的page都要在app.json中进行注册，不然会报错。在page中有三个基本文件：index.js index.wxml index.wxss 注意区分html css 具体的页面文件可以参考我上传的文件目录。
+好了，接下来进入主题，我做的小程序是模仿手机app版的阿姨帮软件，非常之简易。先来看看主界面：<br>
+              ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
+实现界面主要用到的组件有轮播图、tabbar等，通过这些组件快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的.<br>
+这个简易的小程序实现的主要功能有底部栏的切换、页面的跳转、实现定位、页面之间进行交互传值···我来一一分析：<br>
+![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/tabbar.gif) <br>
+先暂且不管我制作的gif图有多渣，主要想体现的就是个各底部栏之间能进行切换，这个功能实现较简单，主要设置页面的路径，请参考一下代码<br>
+```javascript
+"tabBar":{
+    "color":"#888",
+    "selectedColor":"#00beaf",
+    "borderStyle":"white",
+    "backgroundColor":"#fff",
+    "list":[{
+      "pagePath":"pages/home/index",
+      "iconPath":"images/icon5.png",
+      "selectedIconPath":"images/icon1.png",
+      "text":"阿姨帮"
+      },
+      {
+        "pagePath":"pages/order/index",
+        "iconPath":"images/icon2.png",
+        "selectedIconPath":"images/icon6.png",
+        "text":"订单"
+      },
+      {
+        "pagePath":"pages/vip/index",
+        "iconPath":"images/icon3.png",
+        "selectedIconPath":"images/icon7.png",
+        "text":"会员"
+      },
+      {
+        "pagePath":"pages/my/index",
+        "iconPath":"images/icon4.png",
+        "selectedIconPath":"images/icon8.png",
+        "text":"我的"
+        }
+    ]
+  }
+  ```
+  ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/pagechange.gif) <br>
+ 微信小程序是没有a标签的，但是有wx.navigateTo API实现页面的跳转，有关页面的跳转的三种方式可以详看文档，后面还会用到wx.switchTab进行非底栏页面与底栏页面的切换。这个功能实现的key point在于我们要在某个组件上绑定事件，写法为 bindtap="bindViewTap"，然后在js里添上逻辑控制.<br>
+  ```javascript
+  bindViewTap:function(e){
+    wx.navigateTo({
+        url: '../city/index'
+    })
+ ```
+ 接下来要讲的是本小白在此次过程中最头痛的经历，先来看看我要实现的功能：<br>
+  ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/citychange.gif) <br>
+ 我这是在实现小程序的定位功能，当我们一开始进入应用时，页面会显示我们此时此刻所在的城市，然而在微信提供的wx.getLocation API中，它只会返回经纬度，不会讲具体的国家呀城市呀街道等信息反馈给你，所以我们需要借用百度地图、腾讯地图的API来逆地址解析出这些信息。我用的是百度地图的API,这里会有遇到一些坑，在后面会有介绍，具体代码如下：<br>
+
+  ```javascript
+  loadCity:function(longitude,latitude){
+    var page =this;
+    wx.request({
+      url: 'http://api.map.baidu.com/geocoder/v2/?ak=btsVVWf0TM1zUBEbzFz6QqWF&callback=renderReverse&location='+latitude+','+longitude+'&output=json&pois=1',
+      data: {},
+      header:{
+        'Content-Type':'application/json'
+      },
+      success: function(res){
+        // success
+        console.log(res);
+        var str1=res.data;
+        var str2=str1.replace("renderReverse&&renderReverse(","");
+        var str3=str2.substring(0,str2.length-1);
+        var cityresult=JSON.parse(str3);
+        console.log(typeof(cityresult));
+        var city1=cityresult.result.addressComponent.city;
+        var city=city1.replace("市","");
+        page.setData({
+          city:city
+        });
+      },
+      fail: function() {
+        // fail
+      },
+      complete: function() {
+        // complete
+      }
+    })
+  } 
+ ```
+你在途中也能看到，当你跳转到另一个页面，当你选中某一个城市时，主页的地址也要发生改变，这又是怎么做到的呢？<br>
+这就跟本地存储有关了，我们学JS时知道locall storage能够长期的保持数据，我们不妨使用它来实现这种数据之间的传输。我在这调用了wx.setStorage和   wx.getStorage两个API，当我选中某个城市时，就把这个数据保存到数据库中（setstorage）,然后主页使用（getstorage）提取出数据为自己所用。这样想明白就会觉得也不难。看看主要代码实现吧：<br>
+  在city这个的index.js种下这颗“种子”<br>
+ 
+ ```javascript
+  bindViewTap:function(e){
+    // console.log(e.target.dataset.text);
+    var city=e.target.dataset.text;
+    // setStorage API设置本地存储
+    wx.setStorage({
+      key:"city",
+      data:city
+    });
+    wx.switchTab({
+      url: '../home/index'
+    })
+  }
+  ```
+  在home主页的Index.js中摘下“果实”<br>
+  ```javascript
+  onShow:function(){
+    let that=this;
+    // 调用getStorageAPI同步数据
+    wx.getStorage({
+      key: 'city',
+      success:function(res){
+          console.log(res.data);
+          that.setData({
+            city:res.data
+          })
+      }
+    })
+  }
+  ```
+  到这里差不多也都介绍完了，最后我想分享我在过程中踩过的一些坑：<br>
+  * 微信小程序开发中图片的样式是有默认值，宽320 高240 display:inline-block···所以有图片及得要自己给它添上样式，覆盖默认，以防影响！<br>
+  * 在调用百度地图的API中，它会返回含有特殊符号的json字符串，我在这个坑里转了几个小时，度娘说是啥发送请求时自带什么bom头，删除就行，然而，我并没有搞明白，我最后用的方法是把这个不太规矩的字符串通过一些字符串方法以及json,parse()方法把它转化成了json对象。<br>
+  * 最后要讲的是一个细节问题，如果想要及时刷新页面的话，我们最好把数据接口放到onshow()方法里面，这样数据发生改变就能刷新页面的显示。<br>
+  （待续···）
+  
+ 

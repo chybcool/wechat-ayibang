@@ -2,9 +2,17 @@
 微信小程序是什么？<br>
 官方解释，微信小程序，简称小程序，是一种不需要下载安装即可使用的应用，它实现了应用“触手可及”的梦想，用户扫一扫或搜一下即可打开应用。简而言之，就是用户需要的时候打开，用完即走的一种应用。如果小程序能够兴起，我想到时候我们的手机将会变得很简单干净，因为你无需下载安装各种App。<br>
 开发微信小程序你需要准备好这些工具：<br>
-    下载微信开发者工具，附上地址：https://mp.weixin.qq.com/debug/wxadoc/dev/devtools/download.html 下载好后就可以进行开发了，不过呢，如果要发布你的小程序呢，你要去申请AppId走各种流程，不过平时练练手可以选择无Appid进行开发，不过会有一些局限。具体开发详情你可以去https://mp.weixin.qq.com 这里了解。<br>
-在开始coding时，要配置好一些基础文件，在app.json里注册页面(page)，每一个需要用到的page都要在app.json中进行注册，不然会报错。在page中有三个基本文件：index.js index.wxml index.wxss 注意区分html css 具体的页面文件可以参考我上传的文件目录。
-好了，接下来进入主题，我做的小程序是模仿手机app版的阿姨帮软件，非常之简易。先来看看主界面：<br>
+下载微信开发者工具，附上地址：https://mp.weixin.qq.com/debug/wxadoc/dev/devtools/download.html 下载好后就可以进行开发了，不过呢，如果要发布你的小程序呢，你要去申请AppId走各种流程，不过平时练练手可以选择无Appid进行开发，不过会有一些局限。具体开发详情你可以去https://mp.weixin.qq.com 这里了解。<br>
+在创建了一个微信小程序后，会自动生成一些基本文件：<br>
+* page文件夹 页面文件夹 包含你所有的页面文件,至少包含.js .wxml .wxs后缀文件，.json可选
+* utlis文件夹
+* app.js 控制全局的逻辑结构
+* app.json 配置一些全局数据，所有页面都要在此处注册
+* app.wxml 内容显示
+* app.wxss 全局样式
+好了，接下来进入主题，我做的小程序是模仿手机app版的阿姨帮软件，非常之简易。<br>
+首先先要解释我的数据来源，我使用的是用mock来模拟数据，http://www.easy-mock.com Easy Mock 是一个可视化工具，并且能快速生成模拟数据的服务，它能为我们提供一个数据接口url，这要我们就能够使用request发送数据请求了。<br>
+先来看看主界面：<br>
               ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
 实现界面主要用到的组件有轮播图、tabbar等，通过这些组件快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的.<br>
 这个简易的小程序实现的主要功能有底部栏的切换、页面的跳转、实现定位、页面之间进行交互传值···我来一一分析：<br>
@@ -125,6 +133,7 @@
   * 微信小程序开发中图片的样式是有默认值，宽320 高240 display:inline-block···所以有图片及得要自己给它添上样式，覆盖默认，以防影响！<br>
   * 在调用百度地图的API中，它会返回含有特殊符号的json字符串，我在这个坑里转了几个小时，度娘说是啥发送请求时自带什么bom头，删除就行，然而，我并没有搞明白，我最后用的方法是把这个不太规矩的字符串通过一些字符串方法以及json,parse()方法把它转化成了json对象。<br>
   * 最后要讲的是一个细节问题，如果想要及时刷新页面的话，我们最好把数据接口放到onshow()方法里面，这样数据发生改变就能刷新页面的显示。<br>
+  * 区分wx.navigateTo和wx.switchTab，前者是保留当前页面，跳转到应用内的某个页面（不在tabbar），后者是跳转到 tabBar 页面，并关闭其他所有非 tabBar 页面。当我们要从不在tabbar里的页面中跳转到tabbar页面时，除了选择左上角的返回键后，应该选择wx.switchTab,而不是wx.navigateTo。<br>
   （待续···）
   
  

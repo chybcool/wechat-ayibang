@@ -1,7 +1,6 @@
 <view class="container">
 
   <swiper
-  bindchange="swiperchange"
   class="binner"
    vertical="{{vertical}}"
    autoplay="{{autoplay}}"

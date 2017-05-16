@@ -27,13 +27,13 @@ _______
 首先先要解释我的数据来源，我使用的是用mock来模拟数据，http://www.easy-mock.com Easy Mock 是一个可视化工具，并且能快速生成模拟数据的服务，它能为我们提供一个数据接口url，这要我们就能够使用request发送数据请求了。<br>
 
 功能实现
-—————
 
 * 轮播图 & 底栏交互
 
 先来看看主界面：<br>
               ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
 这个界面用到了微信小程序自带的轮播图组件以及tabbar组件，能够快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的. 让我们来看看微信小程序是如何实现的吧：<br>
+
 HTML结构<br>
 ```html
 <swiper
@@ -67,6 +67,7 @@ Page({
   })
 ```
 以上就是实现图片轮播效果的代码，使用swiper组件,在再js里做一些相关配置即可轻松实现。<br>
+
 看看底栏切换交互的效果吧！<br>
 ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/tabbar.gif) <br>
 先暂且不管我制作的gif图有多渣，主要想体现的就是个各底部栏之间能进行切换，这个功能实现较简单，主要设置页面的路径，请参考一下代码<br>
@@ -103,6 +104,7 @@ Page({
     ]
   }
   ```
+  
  接下来是非底栏的页面之间的交互，它的实现主要依赖wx.navigateTo()API<br>
   ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/pagechange.gif) <br>
  微信小程序是没有a标签的，但是有wx.navigateTo API实现页面的跳转，有关页面的跳转的三种方式可以详看文档，后面还会用到wx.switchTab进行非底栏页面与底栏页面的切换。这个功能实现的key point在于我们要在某个组件上绑定事件，写法为 bindtap="bindViewTap"，然后在js里添上逻辑控制，代码参考：<br>
@@ -114,12 +116,14 @@ Page({
  ```
  <br>
  
- * 地理定位 <br>
- 来看看效果图吧 <br>
+* 地理定位 
+ 
+来看看效果图吧 <br>
  
  
   ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/citychange.gif) <br>
- 我这是在实现小程序的定位功能，当我们一开始进入应用时，页面会显示我们此时此刻所在的城市，然而在微信提供的wx.getLocation API中，它只会返回经纬度，不会讲具体的国家呀城市呀街道等信息反馈给你，所以我们需要借用百度地图、腾讯地图的API来逆地址解析出这些信息。我用的是百度地图的API,这里会有遇到一些坑，在后面会有介绍，具体代码如下：<br>
+  
+当我们一开始进入应用时，页面会显示我们此时此刻所在的城市，然而在微信提供的wx.getLocation API中，它只会返回经纬度，不会讲具体的国家呀城市呀街道等信息反馈给你，所以我们需要借用百度地图、腾讯地图的API来逆地址解析出这些信息。我用的是百度地图的API,这里会有遇到一些坑，在后面会有介绍，具体代码如下：<br>
 
   ```javascript
   loadCity:function(longitude,latitude){
@@ -153,9 +157,9 @@ Page({
     })
   } 
  ```
-你在途中也能看到，当你跳转到另一个页面，当你选中某一个城市时，主页的地址也要发生改变，这又是怎么做到的呢？<br>
+你在gif图中也能看到，当你跳转到另一个页面，当你选中某一个城市时，主页的地址也要发生改变，这又是怎么做到的呢？<br>
 这就跟本地存储有关了，我们学JS时知道locall storage能够长期的保持数据，我们不妨使用它来实现这种数据之间的传输。我在这调用了wx.setStorage和   wx.getStorage两个API，当我选中某个城市时，就把这个数据保存到数据库中（setstorage）,然后主页使用（getstorage）提取出数据为自己所用。这样想明白就会觉得也不难。看看主要代码实现吧：<br>
-  在city这个的index.js种下这颗“种子”<br>
+在city这个的index.js种下这颗“种子”<br>
  
  ```javascript
   bindViewTap:function(e){
@@ -187,11 +191,19 @@ Page({
     })
   }
   ```
-  到这里差不多也都介绍完了，最后我想分享我在过程中踩过的一些坑：<br>
-  * 微信小程序开发中图片的样式是有默认值，宽320 高240 display:inline-block···所以有图片及得要自己给它添上样式，覆盖默认，以防影响！<br>
-  * 在调用百度地图的API中，它会返回含有特殊符号的json字符串，我在这个坑里转了几个小时，度娘说是啥发送请求时自带什么bom头，删除就行，然而，我并没有搞明白，我最后用的方法是把这个不太规矩的字符串通过一些字符串方法以及json,parse()方法把它转化成了json对象。<br>
-  * 最后要讲的是一个细节问题，如果想要及时刷新页面的话，我们最好把数据接口放到onshow()方法里面，这样数据发生改变就能刷新页面的显示。<br>
-  * 区分wx.navigateTo和wx.switchTab，前者是保留当前页面，跳转到应用内的某个页面（不在tabbar），后者是跳转到 tabBar 页面，并关闭其他所有非 tabBar 页面。当我们要从不在tabbar里的页面中跳转到tabbar页面时，除了选择左上角的返回键后，应该选择wx.switchTab,而不是wx.navigateTo。<br>
+  以上就是地理地位功能的实现，只要掌握好几个API其实什么问题都迎刃而解。<br>
+  
+* 预约服务
+
+浏览一下效果图
+ 
+
+  
+ 到这里差不多也都介绍完了，最后我想分享我在过程中踩过的一些坑：<br>
+ * 微信小程序开发中图片的样式是有默认值，宽320 高240 display:inline-block···所以有图片及得要自己给它添上样式，覆盖默认，以防影响！<br>
+ * 在调用百度地图的API中，它会返回含有特殊符号的json字符串，我在这个坑里转了几个小时，度娘说是啥发送请求时自带什么bom头，删除就行，然而，我并没有搞   明白，我最后用的方法是把这个不太规矩的字符串通过一些字符串方法以及json,parse()方法把它转化成了json对象。<br>
+ * 最后要讲的是一个细节问题，如果想要及时刷新页面的话，我们最好把数据接口放到onshow()方法里面，这样数据发生改变就能刷新页面的显示。<br>
+ * 区分wx.navigateTo和wx.switchTab，前者是保留当前页面，跳转到应用内的某个页面（不在tabbar），后者是跳转到 tabBar 页面，并关闭其他所有非 tabBar 页面。当我们要从不在tabbar里的页面中跳转到tabbar页面时，除了选择左上角的返回键后，应该选择wx.switchTab,而不是wx.navigateTo。<br>
   <br>
   （待续···）
   

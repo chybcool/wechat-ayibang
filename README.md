@@ -14,21 +14,40 @@ _______
 * app.wxss 全局样式
 
 好了，接下来进入主题，我做的小程序是模仿手机app版的阿姨帮软件，主要实现的功能有：<br>
-* 地理定位
-* 地图选址
-* 预约服务
-* 下单
-* 查看订单
-* 页面跳转
-* 底栏切换良好交互
-* 图片轮播
-* ...
+* `地理定位`
+* `地图选址`
+* `预约服务`
+* `下单`
+* `查看订单`
+* `页面跳转`
+* `底栏切换良好交互`
+* `图片轮播`
+* `...`
 
 首先先要解释我的数据来源，我使用的是用mock来模拟数据，http://www.easy-mock.com Easy Mock 是一个可视化工具，并且能快速生成模拟数据的服务，它能为我们提供一个数据接口url，这要我们就能够使用request发送数据请求了。<br>
 
 先来看看主界面：<br>
               ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
-实现界面主要用到的组件有轮播图、tabbar等，通过这些组件快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的.<br>
+这个界面用到了微信小程序自带的轮播图组件以及tabbar组件，能够快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的. 让我们来看看微信小程序是如何实现的吧：<br>
+```html
+<swiper
+  class="binner"
+   vertical="{{vertical}}"
+   autoplay="{{autoplay}}"
+   interval="{{interval}}"
+   duration="{{duration}}"
+   indicator-dots="{{indicatorDots}}">
+    <block wx:for="{{topimg}}" wx:key="item">
+      <swiper-item>
+        <image src="{{item.image}}" class="slide-image"></image>
+      </swiper-item>
+    </block>
+    <view class="city" bindtap="bindViewTap" >
+         <text class="current">{{city}}</text>
+    </view>
+  </swiper>
+```
+
 此小程序应用主要实现的功能有：`地理地位`、 `地图选址`、`预约服务`、`下单`、`查看订单`、`页面跳转`、`底栏切换良好交互`、`图片轮播`等<br>我来一一分析：<br>
 ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/tabbar.gif) <br>
 先暂且不管我制作的gif图有多渣，主要想体现的就是个各底部栏之间能进行切换，这个功能实现较简单，主要设置页面的路径，请参考一下代码<br>

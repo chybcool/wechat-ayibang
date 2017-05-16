@@ -26,9 +26,11 @@ _______
 
 首先先要解释我的数据来源，我使用的是用mock来模拟数据，http://www.easy-mock.com Easy Mock 是一个可视化工具，并且能快速生成模拟数据的服务，它能为我们提供一个数据接口url，这要我们就能够使用request发送数据请求了。<br>
 
-#功能实现
+功能实现
+—————
 
 * 轮播图 & 底栏交互
+
 先来看看主界面：<br>
               ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
 这个界面用到了微信小程序自带的轮播图组件以及tabbar组件，能够快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的. 让我们来看看微信小程序是如何实现的吧：<br>
@@ -111,6 +113,11 @@ Page({
     })
  ```
  <br>
+ 
+ * 地理定位 <br>
+ 来看看效果图吧 <br>
+ 
+ 
   ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/citychange.gif) <br>
  我这是在实现小程序的定位功能，当我们一开始进入应用时，页面会显示我们此时此刻所在的城市，然而在微信提供的wx.getLocation API中，它只会返回经纬度，不会讲具体的国家呀城市呀街道等信息反馈给你，所以我们需要借用百度地图、腾讯地图的API来逆地址解析出这些信息。我用的是百度地图的API,这里会有遇到一些坑，在后面会有介绍，具体代码如下：<br>
 

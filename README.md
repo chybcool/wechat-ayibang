@@ -26,9 +26,13 @@ _______
 
 首先先要解释我的数据来源，我使用的是用mock来模拟数据，http://www.easy-mock.com Easy Mock 是一个可视化工具，并且能快速生成模拟数据的服务，它能为我们提供一个数据接口url，这要我们就能够使用request发送数据请求了。<br>
 
+#功能实现
+
+* 轮播图 & 底栏交互
 先来看看主界面：<br>
               ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/ayibang.JPG) <br>
 这个界面用到了微信小程序自带的轮播图组件以及tabbar组件，能够快速的实现了我们想要的效果，而这些用原生js或者jquery来coding是有一定麻烦的. 让我们来看看微信小程序是如何实现的吧：<br>
+HTML结构<br>
 ```html
 <swiper
   class="binner"
@@ -47,8 +51,21 @@ _______
     </view>
   </swiper>
 ```
-
-此小程序应用主要实现的功能有：`地理地位`、 `地图选址`、`预约服务`、`下单`、`查看订单`、`页面跳转`、`底栏切换良好交互`、`图片轮播`等<br>我来一一分析：<br>
+JS配置<br>
+```javascript
+Page({
+  data: {
+    indicatorDots:true,
+    vertical:false,
+    autoplay:true,
+    interval:3000,
+    duration:1200,
+    ......
+    }
+  })
+```
+以上就是实现图片轮播效果的代码，使用swiper组件,在再js里做一些相关配置即可轻松实现。<br>
+看看底栏切换交互的效果吧！<br>
 ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/tabbar.gif) <br>
 先暂且不管我制作的gif图有多渣，主要想体现的就是个各底部栏之间能进行切换，这个功能实现较简单，主要设置页面的路径，请参考一下代码<br>
 ```javascript
@@ -84,15 +101,16 @@ _______
     ]
   }
   ```
+ 接下来是非底栏的页面之间的交互，它的实现主要依赖wx.navigateTo()API<br>
   ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/pagechange.gif) <br>
- 微信小程序是没有a标签的，但是有wx.navigateTo API实现页面的跳转，有关页面的跳转的三种方式可以详看文档，后面还会用到wx.switchTab进行非底栏页面与底栏页面的切换。这个功能实现的key point在于我们要在某个组件上绑定事件，写法为 bindtap="bindViewTap"，然后在js里添上逻辑控制.<br>
-  ```javascript
+ 微信小程序是没有a标签的，但是有wx.navigateTo API实现页面的跳转，有关页面的跳转的三种方式可以详看文档，后面还会用到wx.switchTab进行非底栏页面与底栏页面的切换。这个功能实现的key point在于我们要在某个组件上绑定事件，写法为 bindtap="bindViewTap"，然后在js里添上逻辑控制，代码参考：<br>
+ ```javascript
   bindViewTap:function(e){
     wx.navigateTo({
         url: '../city/index'
     })
  ```
- 接下来要讲的是本小白在此次过程中最头痛的经历，先来看看我要实现的功能：<br>
+ <br>
   ![Image text](https://github.com/Sukura7/wechat-ayibang/blob/master/images/citychange.gif) <br>
  我这是在实现小程序的定位功能，当我们一开始进入应用时，页面会显示我们此时此刻所在的城市，然而在微信提供的wx.getLocation API中，它只会返回经纬度，不会讲具体的国家呀城市呀街道等信息反馈给你，所以我们需要借用百度地图、腾讯地图的API来逆地址解析出这些信息。我用的是百度地图的API,这里会有遇到一些坑，在后面会有介绍，具体代码如下：<br>
 
